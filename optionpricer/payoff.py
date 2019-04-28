@@ -17,6 +17,18 @@ class CallPayOff:
         if not isinstance(strike,(float,int)):
             raise TypeError("CallPayOff object initialization: strike should be a float or an integer")
         self._strike = strike
+        self._name   = "a call pay off with strike:"+str(self._strike)
 
     def get_payoff(self,spot):
         return np.maximum((spot-self._strike), 0.0)
+
+    def __str__(self):
+        return self._name
+
+    __repr__ = __str__
+
+# class BadPayOff:
+#     def __init__(self,strike):
+#         if not isinstance(strike,(float,int)):
+#             raise TypeError("CallPayOff object initialization: strike should be a float or an integer")
+#         self._strike = strike
