@@ -1,6 +1,10 @@
 from optionpricer import payoff
 from optionpricer import option
+from optionpricer import bspde
 import numpy as np
+import matplotlib as mpl
+mpl.use('TkAgg')
+import matplotlib.pyplot as plt
 
 call_payoff = payoff.CallPayOff(10.0)
 
@@ -21,3 +25,32 @@ print(str(call_option))
 # badpayoff = payoff.BadPayOff(10.0)
 # call_option_bad = option.VanillaOption(badpayoff,1.0)
 # print(call_option_bad.get_option_payoff(spots))
+
+timegrid  = bspde.FinDiffGrid1D(0.0,1.0,7000)
+timegrid.make_linear_grid()
+spacegrid = bspde.FinDiffGrid1D(0.0,np.pi,200)
+spacegrid.make_linear_grid()
+#spacegrid.set_values()
+bcs = bspde.BoundaryConditions1D()
+bcs.set_lo_dirichlet(0.0)
+bcs.set_hi_dirichlet(0.0)
+
+initial_cond = np.sin(spacegrid.grid)**3
+
+
+#print(spacegrid.grid)
+heat_eq = bspde.HeatEquation1DPde(1.0,spacegrid,timegrid,bcs,initial_cond,all_time_output=True)
+output = heat_eq.solve()
+
+plt.plot(spacegrid.grid,initial_cond,'k')
+plt.plot(spacegrid.grid,output[100,:],'b')
+# plt.plot(spacegrid.grid,output[200,:],'b')
+plt.plot(spacegrid.grid,output[-1,:],'m')
+plt.show()
+
+plt.plot(timegrid.grid,output[:,100],'k')
+plt.show()
+
+# print(bspde.tridiag_constant(-1.0,2.0,-1.0,[1.0,2.0,3.0]))
+# print(bspde.tridiag_varying([-1.0]*3,[2.0]*3,[-1.0]*3,[1.0,2.0,3.0]))
+#print(bspde.tridiag_constant(-2006.0, 1994012.0, -2006.0,initial_cond))
