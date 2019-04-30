@@ -22,6 +22,9 @@ class CallPayOff:
     def get_payoff(self,spot):
         return np.maximum((spot-self._strike), 0.0)
 
+    def get_strike(self):
+        return self._strike
+
     def __str__(self):
         return self._name
 

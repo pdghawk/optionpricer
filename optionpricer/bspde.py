@@ -3,7 +3,8 @@
 """
 
 import numpy as np
-
+from scipy.interpolate import interp1d
+import copy
 
 class FinDiffGrid1D:
 
@@ -22,6 +23,9 @@ class FinDiffGrid1D:
     def set_values(self,values):
         assert(len(values)==self._number_of_nodes)
         self.values = values
+
+    def fun_to_grid(self,fun):
+        self.grid = fun(self.grid)
 
     def get_delta(self):
         return self._delta
@@ -119,6 +123,52 @@ class HeatEquation1DPde:
             self._space.values[self._space.get_number_of_nodes()-1] = self._boundary_conditions.hi_bc
 
         return None
+
+class BlackScholesSingleAssetPricer:
+    def __init__(self,option,volatility,interest_rate,boundary_conditions):
+        self._option=option
+        self.volatility = volatility
+        self.interest_rate = interest_rate
+        #self.spot = spot
+        #self.spot_grid = copy.deepcopy(spot_grid)
+        self.time_grid = FinDiffGrid1D(0,self._option.get_expiry(),int(600*self._option.get_expiry()))
+        self.time_grid.make_linear_grid()
+        self.boundary_conditions = boundary_conditions
+
+    def solve(self,spot,spot_grid,get_price_on_whole_grid=False):
+        expiry = self._option.get_expiry()
+        diffusion_coeff = 0.5*self.volatility**2
+        r = self.interest_rate
+
+        time_to_tau = lambda t:expiry-t
+        tau_to_time = lambda tau:expiry-tau
+        self.time_grid.fun_to_grid(time_to_tau)
+
+        spot_to_x = lambda s:np.log(s) #+ (r - diffusion_coeff)*(expiry-self.time_grid.grid)
+        x_to_spot = lambda x,tau:np.exp(x - (r - diffusion_coeff)*tau)
+        x_grid = FinDiffGrid1D(spot_grid._min_value,spot_grid._max_value,spot_grid._number_of_nodes)
+        x_grid.make_linear_grid()
+        #print("before: ",x_grid.grid,"\n\n")
+        x_grid.fun_to_grid(spot_to_x)
+        #print("after: ",x_grid.grid,"\n\n")
+
+        init_cond = self._option.get_option_payoff(np.exp(x_grid.grid))* \
+                    np.exp(-self.interest_rate*expiry)
+        #print("inti:",self._option.get_option_payoff(x_grid.grid),"\n\n")
+        heat_eq = HeatEquation1DPde(1.0,x_grid,self.time_grid,self.boundary_conditions,init_cond)
+        heat_eq.solve()
+        # note that heat eq solution stored in x_grid.values
+        option_price_at_all_spots = x_grid.values
+        #print(option_price_at_all_spots)
+        if get_price_on_whole_grid:
+            return option_price_at_all_spots
+        # interpolate to get value at the chosen spot
+        interpolator = interp1d(x_to_spot(x_grid.grid,expiry),x_grid.values)
+        #print(spot)
+        #print(x_to_spot(x_grid.grid,expiry))
+        return interpolator(spot)
+
+
 
 
 def tridiag_varying(a,b,c,d,dtype_=np.float64):
