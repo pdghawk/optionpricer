@@ -26,9 +26,14 @@ class FinDiffGrid1D:
 
     def fun_to_grid(self,fun):
         self.grid = fun(self.grid)
+        # can no longer guarantee linear grid - so set delta to None
+        self._delta = None
 
-    def get_delta(self):
-        return self._delta
+    def get_delta(self,absolute=True):
+        if absolute:
+            return np.abs(self._delta)
+        else:
+            return self._data
 
     def get_number_of_nodes(self):
         return self._number_of_nodes
@@ -140,8 +145,6 @@ class BlackScholesSingleAssetPricer:
         self._option=option
         self.volatility = volatility
         self.interest_rate = interest_rate
-        self.time_grid = FinDiffGrid1D(0,self._option.get_expiry(),int(800*self._option.get_expiry()))
-        self.time_grid.make_linear_grid()
         self.boundary_conditions = boundary_conditions
 
     def solve(self,spot,get_price_on_whole_grid=False):
@@ -150,9 +153,8 @@ class BlackScholesSingleAssetPricer:
         r = self.interest_rate
         k = self._option._payoff.get_strike()
 
-        time_to_tau = lambda t:expiry-t
-        tau_to_time = lambda tau:expiry-tau
-        self.time_grid.fun_to_grid(time_to_tau)
+        t_grid = FinDiffGrid1D(self._option.get_expiry(),0.0,int(800*self._option.get_expiry()))
+        t_grid.make_linear_grid()
 
         spot_to_x = lambda s:np.log(s/k) #only defined at expiry
         x_to_spot = lambda x,tau:k*np.exp(x - (r - diffusion_coeff)*tau)
@@ -164,7 +166,7 @@ class BlackScholesSingleAssetPricer:
 
         init_cond = self._option.get_option_payoff(k*np.exp(x_grid.grid))
 
-        heat_eq = HeatEquation1DPde(diffusion_coeff,x_grid,self.time_grid,self.boundary_conditions,init_cond)
+        heat_eq = HeatEquation1DPde(diffusion_coeff,x_grid,t_grid,self.boundary_conditions,init_cond)
         heat_eq.solve()
         # note that heat eq solution stored in x_grid.values
         option_price_at_all_spots = x_grid.values*np.exp(-r*expiry)
