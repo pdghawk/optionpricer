@@ -1,6 +1,7 @@
 from optionpricer import payoff
 from optionpricer import option
 from optionpricer import bspde
+from optionpricer import analytics
 import numpy as np
 import matplotlib as mpl
 mpl.use('TkAgg')
@@ -60,23 +61,33 @@ print(str(call_option))
 # print(bspde.tridiag_constant(-2006.0, 1994012.0, -2006.0,initial_cond))
 
 ################################################################################
-call_payoff = payoff.CallPayOff(50.0)
+strike = 50.0
+expiry = 1.0 #(18.0/12.0)
 
-call_option = option.VanillaOption(call_payoff,3.0)
+call_payoff = payoff.CallPayOff(strike)
 
-spotgrid = bspde.FinDiffGrid1D(0.1,120.0,100)
+call_option = option.VanillaOption(call_payoff,expiry)
+
+spotgrid = bspde.FinDiffGrid1D(1.0e-15,120.0,5000)
 spotgrid.make_linear_grid()
 
 bcs = bspde.BoundaryConditions1D()
 #bcs.set_lo_dirichlet(call_option.get_option_payoff(spotgrid.grid[0]))
+#bcs.set_lo_dirichlet(0.0)
 #bcs.set_hi_dirichlet(call_option.get_option_payoff(spotgrid.grid[-1]))
-
-bspricer = bspde.BlackScholesSingleAssetPricer(call_option,0.1,0.02,bcs)
+r = 0.024
+sig = 0.12
+bspricer = bspde.BlackScholesSingleAssetPricer(call_option,r,sig,bcs)
 
 spots=np.linspace(20.0,70.0,30)
-prices=[]
-for s in spots:
-    prices.append( bspricer.solve(s,spotgrid) )
+# prices=[]
+# bs_prices=[]
+# for s in spots:
+#     prices.append( bspricer.solve(s,spotgrid) )
+#     bs_prices.append( analytics.black_scholes_call_price(s,strike,expiry,r,sig) )
 
+prices    = bspricer.solve(spots)
+bs_prices = analytics.black_scholes_call_price(spots,strike,expiry,r,sig)
 plt.plot(spots, prices, 'k')
+plt.plot(spots, bs_prices, 'r')
 plt.show()
