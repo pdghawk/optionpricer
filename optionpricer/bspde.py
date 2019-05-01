@@ -222,3 +222,6 @@ def tridiag_constant(a,b,c,d,dtype_=np.float64):
         out[i] = dp[i] - cp[i]*out[i+1];
 
     return out
+
+# for 2d problems where tridiag won't work probably use:
+# scipy.sparse.linalg.cg

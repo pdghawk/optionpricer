@@ -2,6 +2,9 @@ from optionpricer import payoff
 from optionpricer import option
 from optionpricer import bspde
 from optionpricer import analytics
+from optionpricer import parameter as prmtr
+from optionpricer import path
+from optionpricer import generator
 import numpy as np
 import matplotlib as mpl
 mpl.use('TkAgg')
@@ -95,16 +98,90 @@ print(str(call_option))
 
 ################################################################################
 
-strike = 50.0
-expiry = 1.0
-r = 0.024
-sig = 0.12
 
-payoff = payoff.PutPayOff(strike)
-option = option.VanillaOption(payoff,expiry)
-bcs = bspde.BoundaryConditions1D()
-bspricer = bspde.BlackScholesSingleAssetPricer(option,r,sig,bcs)
-spots=np.linspace(20.0,70.0,30)
-prices    = bspricer.solve(spots)
-plt.plot(spots, prices, 'k')
+# strike = 50.0
+# expiry = 1.0
+# r = 0.024
+# sig = 0.12
+#
+# payoff = payoff.PutPayOff(strike)
+# option = option.VanillaOption(payoff,expiry)
+# bcs = bspde.BoundaryConditions1D()
+# bspricer = bspde.BlackScholesSingleAssetPricer(option,r,sig,bcs)
+# spots=np.linspace(20.0,70.0,30)
+# prices    = bspricer.solve(spots)
+# plt.plot(spots, prices, 'k')
+# plt.show()
+
+################################################################################
+# expiry    = 1.0/12.0
+# Nt        = 200
+# times     = np.linspace(0,expiry,Nt)
+#
+# r0   = 0.024
+# sig0 = 0.12
+# r_param   = prmtr.SimpleParam(r0)
+# vol_param = prmtr.SimpleParam(sig0)
+#
+# S0 = 100.0
+#
+# # Npaths  = 1500
+# # mypaths = np.zeros((Nt,Npaths))
+# # for i in range(Npaths):
+# #     mypaths[:,i] = path.single_timed_lognormal_path(S0,times,r_param,vol_param)
+# #
+# # mypaths0 = np.zeros((Npaths,))
+# # for i in range(Npaths):
+# #     mypaths0[i] = path.single_lognormal_path(S0,0,times[-1],r_param,vol_param)
+#
+# # plt.plot(times,mypaths)
+# # plt.show()
+# #
+# # plt.plot(times,np.log(mypaths)-np.log(S0),alpha=0.3)
+# # plt.plot(times,(r0-0.5*sig0**2)*times,'k--')
+# # plt.plot(times,3*sig0*np.sqrt(times),'r--')
+# # plt.plot(times,(r0-0.5*sig0**2)*times+ 3*sig0*np.sqrt(times),'b--')
+# # plt.show()
+# #
+# # vals,bins,ppp = plt.hist(np.log(np.squeeze(mypaths[-1,:]))-np.log(S0)-(r0-0.5*sig0**2)*times[-1],bins=100,alpha=0.5,color='r')
+# # plt.hist(np.log(mypaths0)-np.log(S0)-(r0-0.5*sig0**2)*times[-1],bins=100,alpha=0.3,color='b')
+# # x_ax = bins[:-1]+0.5*(bins[1]-bins[0])
+# # plt.plot(x_ax, np.mean(vals[len(vals)//2-5:len(vals)//2+5])*np.exp(-0.5*(x_ax/(sig0*np.sqrt(times[-1])))**2),'k')
+# # plt.show()
+#
+# Npaths = 500
+# future_spots = path.many_antithetic_lognormal_paths(Npaths,S0,0,times[-1],r_param,vol_param)
+#
+# print(future_spots)
+#
+# plt.hist(np.log(future_spots)-np.log(S0)-(r0-0.5*sig0**2)*times[-1],bins=50,alpha=0.3,color='b')
+# plt.show()
+
+# ------------------------------------------------------------------------------
+
+gen_norm = generator.normal()
+gen_norm_antith = generator.antithetic(gen_norm)
+#
+# print(gen_norm.get_samples(10))
+# print(gen_norm_antith.get_samples(10))
+
+expiry    = 1.0/12.0
+Nt        = 200
+times     = np.linspace(0,expiry,Nt)
+
+r0   = 0.024
+sig0 = 0.12
+r_param   = prmtr.SimpleParam(r0)
+vol_param = prmtr.SimpleParam(sig0)
+
+S0 = 100.0
+
+Npaths = 1500
+future_spots = path.many_paths(Npaths,S0,gen_norm_antith,0.0,times[-1],r_param,vol_param)
+
+#print(future_spots-S0)
+
+vals,bins,ppp = plt.hist(np.log(future_spots)-np.log(S0)-(r0-0.5*sig0**2)*times[-1],bins=100,alpha=0.3,color='b')
+x_ax = bins[:-1]+0.5*(bins[1]-bins[0])
+plt.plot(x_ax, np.mean(vals[len(vals)//2-5:len(vals)//2+5])*np.exp(-0.5*(x_ax/(sig0*np.sqrt(times[-1])))**2),'k')
 plt.show()
