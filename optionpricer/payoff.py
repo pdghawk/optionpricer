@@ -18,6 +18,7 @@ class CallPayOff:
             raise TypeError("CallPayOff object initialization: strike should be a float or an integer")
         self._strike = strike
         self._name   = "a call pay off with strike:"+str(self._strike)
+        self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
         return np.maximum((spot-self._strike), 0.0)
@@ -37,6 +38,7 @@ class PutPayOff:
             raise TypeError("PutPayOff object initialization: strike should be a float or an integer")
         self._strike = strike
         self._name   = "a put pay off with strike:"+str(self._strike)
+        self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
         return np.maximum((self._strike-spot), 0.0)
@@ -56,6 +58,7 @@ class DigitalPayOff:
             raise TypeError("DisigitalPayOff object initialization: strike should be a float or an integer")
         self._strike = strike
         self._name   = "a digital pay off with strike:"+str(self._strike)
+        self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
         if isinstance(spot, (float, int)):
@@ -89,6 +92,7 @@ class DoubleDigitalPayOff:
         self._strike_lo = strike_lo
         self._strike_hi = strike_hi
         self._name   = "a double digital pay off with strikes:"+str(self._strike_lo)+", "+str(self._strike_hi)
+        self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
         if isinstance(spot, (float, int)):

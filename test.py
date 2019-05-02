@@ -5,6 +5,7 @@ from optionpricer import analytics
 from optionpricer import parameter as prmtr
 from optionpricer import path
 from optionpricer import generator
+from optionpricer import montecarlo
 import numpy as np
 import matplotlib as mpl
 mpl.use('TkAgg')
@@ -25,6 +26,8 @@ print(call_option.get_option_payoff(spots))
 print(call_option.get_expiry())
 
 print(str(call_option))
+
+print(type(call_option) is option.VanillaOption)
 
 # badpayoff = payoff.BadPayOff(10.0)
 # call_option_bad = option.VanillaOption(badpayoff,1.0)
@@ -159,29 +162,100 @@ print(str(call_option))
 
 # ------------------------------------------------------------------------------
 
-gen_norm = generator.normal()
-gen_norm_antith = generator.antithetic(gen_norm)
+# test generator
+
+# gen_norm = generator.normal()
+# gen_norm_antith = generator.antithetic(gen_norm)
+# #
+# # print(gen_norm.get_samples(10))
+# # print(gen_norm_antith.get_samples(10))
 #
-# print(gen_norm.get_samples(10))
-# print(gen_norm_antith.get_samples(10))
+# expiry    = 1.0/12.0
+# Nt        = 200
+# times     = np.linspace(0,expiry,Nt)
+#
+# r0   = 0.024
+# sig0 = 0.12
+# r_param   = prmtr.SimpleParam(r0)
+# vol_param = prmtr.SimpleParam(sig0)
+#
+# S0 = 100.0
+#
+# Npaths = 1500
+# future_spots = path.many_paths(Npaths,S0,gen_norm_antith,0.0,times[-1],r_param,vol_param)
+#
+# #print(future_spots-S0)
+#
+# vals,bins,ppp = plt.hist(np.log(future_spots)-np.log(S0)-(r0-0.5*sig0**2)*times[-1],bins=100,alpha=0.3,color='b')
+# x_ax = bins[:-1]+0.5*(bins[1]-bins[0])
+# plt.plot(x_ax, np.mean(vals[len(vals)//2-5:len(vals)//2+5])*np.exp(-0.5*(x_ax/(sig0*np.sqrt(times[-1])))**2),'k')
+# plt.show()
+
+# ------------------------------------------------------------------------------
 
 expiry    = 1.0/12.0
-Nt        = 200
-times     = np.linspace(0,expiry,Nt)
 
-r0   = 0.024
+strike = 50.0
+
+r0   = 0.094
 sig0 = 0.12
 r_param   = prmtr.SimpleParam(r0)
 vol_param = prmtr.SimpleParam(sig0)
 
-S0 = 100.0
+payoff = payoff.CallPayOff(strike)
+#payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
+option = option.VanillaOption(payoff,expiry)
 
-Npaths = 1500
-future_spots = path.many_paths(Npaths,S0,gen_norm_antith,0.0,times[-1],r_param,vol_param)
+gen_norm = generator.normal()
+gen_norm_antith = generator.antithetic(gen_norm)
 
-#print(future_spots-S0)
+spots = np.linspace(40.0,70.0,30)
 
-vals,bins,ppp = plt.hist(np.log(future_spots)-np.log(S0)-(r0-0.5*sig0**2)*times[-1],bins=100,alpha=0.3,color='b')
-x_ax = bins[:-1]+0.5*(bins[1]-bins[0])
-plt.plot(x_ax, np.mean(vals[len(vals)//2-5:len(vals)//2+5])*np.exp(-0.5*(x_ax/(sig0*np.sqrt(times[-1])))**2),'k')
+mc_pricer = montecarlo.SAMonteCarlo(option,gen_norm_antith)
+mc_prices = np.zeros_like(spots)
+for s_idx,s in enumerate(spots):
+    print('spot',s)
+    mc_prices[s_idx]  = mc_pricer.solve_price(s,r_param,vol_param)
+    print(mc_pricer.get_iteration_count())
+    mc_pricer.reset()
+    #print(mc_prices[s_idx])
+
+# print('monte carlo price = ', mc_price)
+# print(mc_pricer.get_iteration_count())
+
+bs_prices = analytics.black_scholes_call_price(spots,strike,expiry,r0,sig0)
+
+bcs = bspde.BoundaryConditions1D()
+bspricer = bspde.BlackScholesSingleAssetPricer(option,r0,sig0,bcs)
+
+pde_prices   = bspricer.solve(spots)
+
+#plt.plot(spots,bs_prices,'k',label='Analytic')
+plt.fill_between(spots,bs_prices,facecolor='b',alpha=0.4,label='Analytic')
+plt.plot(spots,pde_prices,'k',label='PDE')
+plt.plot(spots,mc_prices,'r-.',label='Monte Carlo')
+plt.plot([strike, strike],[0,1.2*np.amax(bs_prices)],'b',label='strike')
+plt.legend(frameon=False)
+plt.xlabel('spot')
+plt.ylabel('option price')
+plt.title(str(option))
+
+plt.xlim([spots[0], spots[-1]])
+plt.ylim([0,1.2*np.amax(bs_prices)])
+
+plt.show()
+
+pde_error = np.abs(pde_prices-bs_prices)/bs_prices
+mc_error  = np.abs(mc_prices-bs_prices)/bs_prices
+plt.semilogy(spots,pde_error,'k',label='PDE')
+plt.semilogy(spots,mc_error,'r-.',label='Monte')
+plt.plot([strike, strike],[1e-9,1],'b',label='strike')
+plt.legend(frameon=False)
+plt.xlabel('spot')
+plt.ylabel('|price - analytic|/analytic')
+plt.title(str(option))
+
+plt.xlim([spots[0], spots[-1]])
+plt.ylim([1e-9, 1])
+
 plt.show()
