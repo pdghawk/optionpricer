@@ -134,7 +134,7 @@ class HeatEquation1DPde:
         if type(boundary_conditions) == BoundaryConditions1D:
             self._boundary_conditions = boundary_conditions.clone()
         else:
-            rause TypeError("boundary conditions passed to HeatEquation1DPde \
+            raise TypeError("boundary conditions passed to HeatEquation1DPde \
                              should be a  bspde.BoundaryConditions1D object")
         self._initial_condition   = initial_condition
         self._timed_output_flag   = all_time_output
@@ -215,8 +215,8 @@ class HeatEquation1DPde:
 class BlackScholesSingleAssetPricer:
     """ Define Black Scholes problem for PDE solution
     """
-    def __init__(self,option,interest_rate,volatility,boundary_conditions):
-        self._option=option.clone()
+    def __init__(self,option_,interest_rate,volatility,boundary_conditions):
+        self._option=option_.clone()
         self.volatility = volatility
         self.interest_rate = interest_rate
         self.boundary_conditions = boundary_conditions.clone()

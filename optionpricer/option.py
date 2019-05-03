@@ -22,7 +22,7 @@ class VanillaOption:
             raise TypeError("VanillaOption object initialization: expiry should be time to expiry (in years) as a float or int")
         self._expiry = expiry
         self._payoff = payoff.clone() # should be a clone
-        self._name   = "a vanilla option with " + str(self._payoff) + ", and expiry: " + str(self._expiry)
+        self._name   = "a vanilla option with " + str(self._payoff) + ", and expiry: " + "{:.1f}".format(self._expiry*252.0) + "days"
         print(self._name)
 
     def get_option_payoff(self,spot):

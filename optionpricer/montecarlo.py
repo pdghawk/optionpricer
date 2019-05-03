@@ -6,11 +6,11 @@ import numpy as np
 # members: price, stats object, epsilon
 # so that as run, the stats object gets updated
 
-def montecarlo_sa_vanilla_price(option,n_paths,spot,generator,r_param,vol_param):
+def montecarlo_sa_vanilla_price(option_,n_paths,spot,generator,r_param,vol_param):
     """ get the price of a vanilla option based on n_paths
 
     Args:
-        - option: the option to price
+        - option_: the option to price
         - n_paths: number of paths to use
         - spot: current spot
         - generator: (of optionpricer.generator type) a stastical genertor for the path
@@ -19,11 +19,11 @@ def montecarlo_sa_vanilla_price(option,n_paths,spot,generator,r_param,vol_param)
     Returns:
         - price: the statistically expected price
     """
-    if type(option) == option.VanillaOption:
-        expiry = option.get_expiry()
+    if type(option_) == option.VanillaOption:
+        expiry = option_.get_expiry()
         future_spots = path.many_paths(n_paths,spot,generator,0.0,expiry,r_param,vol_param)
         _,_,_,discount = path.get_path_constants(0.0,expiry,r_param,vol_param)
-        payoffs = option.get_option_payoff(future_spots)
+        payoffs = option_.get_option_payoff(future_spots)
         payoffs *= discount
     else:
         raise NotImplementedError("only VanillaOption's can be  \
@@ -37,8 +37,8 @@ class SAMonteCarlo:
 
     For a given option and stistical generator, get the price of the option
     """
-    def __init__(self,option,generator):
-        self._option   = option.clone()
+    def __init__(self,option_,generator):
+        self._option   = option_.clone()
         self._generator = generator.clone()
         #self.options   = {'eps':0.1,'max_steps':1e6,'steps_per_iter':200}
         self.price = 0.0
