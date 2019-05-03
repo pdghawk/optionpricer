@@ -1,12 +1,21 @@
+""" Module for statistal/random number generators
+"""
 import numpy as np
 import copy
 
 class normal:
+    """ object for generating random normally distributed numbers"""
     def __init__(self,mean=0.0,var=1.0):
         self.mean = mean
         self.var  = var
 
     def get_samples(self,n_samples=1):
+        """ get samples from normally distributed samples
+        Keyword Args:
+            - n_samples: number of samples to get (defaults to 1)
+        Returns:
+            normally distributed samples, n_samples in number
+        """
         return np.random.normal(self.mean,self.var,n_samples)
 
     def clone(self):
@@ -14,12 +23,24 @@ class normal:
 
 
 class antithetic:
+    """ generate antithetic distributions
+
+    Uses another generator class to get the statistical distribution type, but
+    outputs the results so that the samples are antithetic
+    """
     def __init__(self,gen):
         self._negate     = False
         self._generator  = gen.clone()
         self.last_sample = None
 
     def get_samples(self,n_samples=1):
+        """ get samples from the distribution
+
+        Keyword Args:
+            - n_samples: number of samples to get (defaults to 1)
+        Returns:
+            antithetic samples according to self._generators distribution, n_samples in number
+        """
         assert(n_samples>0)
         if (n_samples == 1 and not self._negate):
             samples = self.generator.get_samples(n_samples)

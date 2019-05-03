@@ -9,16 +9,38 @@ All classes should have at a minimum methods:
 
 
 class SimpleParam:
+    """ a constant in time parameter """
     def __init__(self,value):
         self.value = value
 
     def integral(self,time0,time1):
+        """ get integral of parameter between two times
+        Args:
+            - time0: lower integral bound
+            - time1: upper integral bound
+        Returns:
+            - intgral: \int_{time0}^{time1} parameter(t)
+        """
         return self.value*(time1-time0)
 
     def square_integral(self,time0,time1):
+        """ get square integral of parameter between two times
+        Args:
+            - time0: lower integral bound
+            - time1: upper integral bound
+        Returns:
+            - intgral: \int_{time0}^{time1} parameter^2(t)
+        """
         return self.value**2*(time1-time0)
 
     def mean(self,time0,time1):
+        """ get mean of parameter between two times
+        Args:
+            - time0: lower integral bound
+            - time1: upper integral bound
+        Returns:
+            - intgral: (\int_{time0}^{time1} parameter(t))/(time1-time0)
+        """
         return self.value
 
     def clone(self):
