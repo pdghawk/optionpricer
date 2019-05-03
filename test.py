@@ -202,16 +202,16 @@ sig0 = 0.12
 r_param   = prmtr.SimpleParam(r0)
 vol_param = prmtr.SimpleParam(sig0)
 
-payoff = payoff.CallPayOff(strike)
+payoff_ = payoff.CallPayOff(strike)
 #payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
-option = option.VanillaOption(payoff,expiry)
+option_ = option.VanillaOption(payoff_,expiry)
 
 gen_norm = generator.normal()
 gen_norm_antith = generator.antithetic(gen_norm)
 
 spots = np.linspace(40.0,70.0,30)
 
-mc_pricer = montecarlo.SAMonteCarlo(option,gen_norm_antith)
+mc_pricer = montecarlo.SAMonteCarlo(option_,gen_norm_antith)
 mc_prices = np.zeros_like(spots)
 for s_idx,s in enumerate(spots):
     print('spot',s)
@@ -226,7 +226,7 @@ for s_idx,s in enumerate(spots):
 bs_prices = analytics.black_scholes_call_price(spots,strike,expiry,r0,sig0)
 
 bcs = bspde.BoundaryConditions1D()
-bspricer = bspde.BlackScholesSingleAssetPricer(option,r0,sig0,bcs)
+bspricer = bspde.BlackScholesSingleAssetPricer(option_,r0,sig0,bcs)
 
 pde_prices   = bspricer.solve(spots)
 
@@ -259,3 +259,16 @@ plt.xlim([spots[0], spots[-1]])
 plt.ylim([1e-9, 1])
 
 plt.show()
+
+#
+
+payoff_ = payoff.CallPayOff(strike)
+#payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
+option_ = option.VanillaOption(payoff_,expiry)
+
+print(option_.get_option_payoff(60.0))
+payoff_._strike = 60.0
+print(option_.get_option_payoff(60.0))
+print(option_.get_expiry())
+expiry = 1.23
+print(option_.get_expiry())

@@ -38,6 +38,9 @@ class FinDiffGrid1D:
     def get_number_of_nodes(self):
         return self._number_of_nodes
 
+    def clone(self):
+        return copy.deepcopy(self)
+
 
 class BoundaryConditions1D:
 
@@ -68,14 +71,16 @@ class BoundaryConditions1D:
         assert(not self.hi_isdeumann)
         self.hi_isneumann = True
         self.hi_bc = derivitive_value
+    def clone(self):
+        return copy.deepcopy(self)
 
 
 class HeatEquation1DPde:
     def __init__(self,diffusion_factor,space_grid,time_grid,boundary_conditions,initial_condition,all_time_output=False):
         self._diffusion_factor = diffusion_factor
-        self._space = space_grid
-        self._time  = time_grid
-        self._boundary_conditions = boundary_conditions
+        self._space = space_grid.clone()
+        self._time  = time_grid.clone()
+        self._boundary_conditions = boundary_conditions.clone()
         self._initial_condition   = initial_condition
         self._timed_output_flag   = all_time_output
 
@@ -140,12 +145,16 @@ class HeatEquation1DPde:
 
         return None
 
+    def clone(self):
+        return copy.deepcopy(self)
+
+
 class BlackScholesSingleAssetPricer:
     def __init__(self,option,interest_rate,volatility,boundary_conditions):
-        self._option=option
+        self._option=option.clone()
         self.volatility = volatility
         self.interest_rate = interest_rate
-        self.boundary_conditions = boundary_conditions
+        self.boundary_conditions = boundary_conditions.clone()
 
     def solve(self,spot,get_price_on_whole_grid=False):
         expiry = self._option.get_expiry()
@@ -167,9 +176,9 @@ class BlackScholesSingleAssetPricer:
         init_cond = self._option.get_option_payoff(k*np.exp(x_grid.grid))
 
         heat_eq = HeatEquation1DPde(diffusion_coeff,x_grid,t_grid,self.boundary_conditions,init_cond)
-        heat_eq.solve()
+        solution_on_x = heat_eq.solve()
         # note that heat eq solution stored in x_grid.values
-        option_price_at_all_spots = x_grid.values*np.exp(-r*expiry)
+        option_price_at_all_spots = solution_on_x*np.exp(-r*expiry)
         #print(option_price_at_all_spots)
         if get_price_on_whole_grid:
             return option_price_at_all_spots
@@ -177,6 +186,9 @@ class BlackScholesSingleAssetPricer:
         interpolator = interp1d(x_to_spot(x_grid.grid,expiry),option_price_at_all_spots)
 
         return interpolator(spot)
+
+    def clone(self):
+        return copy.deepcopy(self)
 
 
 

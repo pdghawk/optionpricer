@@ -18,8 +18,8 @@ def montecarlo_sa_vanilla_price(option,n_paths,spot,generator,r_param,vol_param)
 
 class SAMonteCarlo:
     def __init__(self,option,generator):
-        self._option   = option
-        self._generator = generator
+        self._option   = option.clone()
+        self._generator = generator.clone()
         #self.options   = {'eps':0.1,'max_steps':1e6,'steps_per_iter':200}
         self.price = 0.0
         self.eps   = 1.0e20
@@ -56,3 +56,6 @@ class SAMonteCarlo:
 
     def get_iteration_count(self):
         return self._iter_count
+
+    def clone(self):
+        return copy.deepcopy(self)

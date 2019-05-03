@@ -20,3 +20,6 @@ class SimpleParam:
 
     def mean(self,time0,time1):
         return self.value
+
+    def clone(self):
+        return copy.deepcopy(self)

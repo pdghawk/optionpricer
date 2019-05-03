@@ -7,8 +7,11 @@ getpayoff method
 
 get_payoff method could instead be __call__ method, but then any abject with __call__
 would be able to be used like a payoff, which could cause unexpected errors.
-"""
 
+
+Payoffs need to have a clone method
+"""
+import copy
 import numpy as np
 #import error
 
@@ -25,6 +28,9 @@ class CallPayOff:
 
     def get_strike(self):
         return self._strike
+
+    def clone(self):
+        return copy.deepcopy(self)
 
     def __str__(self):
         return self._name

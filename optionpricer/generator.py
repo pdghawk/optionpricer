@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 class normal:
     def __init__(self,mean=0.0,var=1.0):
@@ -8,11 +9,14 @@ class normal:
     def get_samples(self,n_samples=1):
         return np.random.normal(self.mean,self.var,n_samples)
 
+    def clone(self):
+        return copy.deepcopy(self)
+
 
 class antithetic:
     def __init__(self,gen):
         self._negate     = False
-        self._generator  = gen
+        self._generator  = gen.clone()
         self.last_sample = None
 
     def get_samples(self,n_samples=1):
@@ -43,3 +47,6 @@ class antithetic:
             self._negate = False
 
             return samples
+
+    def clone(self):
+        return copy.deepcopy(self)
