@@ -20,7 +20,8 @@ def montecarlo_sa_vanilla_price(option_,n_paths,spot,generator,r_param,vol_param
         - price: the statistically expected price
     """
     if type(option_) == option.VanillaOption:
-        expiry = option_.get_expiry()
+        #expiry = option_.get_expiry()
+        expiry = option_.the_expiry
         future_spots = path.many_paths(n_paths,spot,generator,0.0,expiry,r_param,vol_param)
         _,_,_,discount = path.get_path_constants(0.0,expiry,r_param,vol_param)
         payoffs = option_.get_option_payoff(future_spots)

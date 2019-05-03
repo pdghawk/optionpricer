@@ -145,7 +145,7 @@ class HeatEquation1DPde:
             - values of u at all space grid points and final time grid point,
               or values of u at all space and time grid points (if self._timed_output_flag)
         """
-
+        # set up essentials for the time-dynamics - factors of linalg problem
         dt = self._time.get_delta()
         dx = self._space.get_delta()
         # factors for tridiagonal problem (lhs)
@@ -170,7 +170,7 @@ class HeatEquation1DPde:
             timed_solution[0,:] = self._initial_condition
 
         for i in range(n_time-1):
-            if i<10: # do forward Euler steps for first few steps
+            if i<0: # do forward Euler steps for first few steps
                 d = euler_a*np.concatenate((np.zeros((1,)),self._space.values[:n_space-1]))
                 d+= euler_b*self._space.values
                 d+= euler_a*np.concatenate((self._space.values[1:],np.zeros((1,))))
@@ -182,7 +182,7 @@ class HeatEquation1DPde:
                 d = aprime*np.concatenate((np.zeros((1,)),self._space.values[:n_space-1]))
                 d+= bprime*self._space.values
                 d+= cprime*np.concatenate((self._space.values[1:],np.zeros((1,))))
-
+                # run the tridiagonal problem, to get new u
                 self._space.set_values(tridiag_constant(a,b,c,d))
 
                 self.apply_boundary_conditions()
@@ -221,20 +221,24 @@ class BlackScholesSingleAssetPricer:
         self.interest_rate = interest_rate
         self.boundary_conditions = boundary_conditions.clone()
 
-    def solve(self,spot,get_price_on_whole_grid=False):
+    def solve(self,spot,get_price_on_whole_grid=False,dt=0.004,dx=0.0012):
         """ Solve the pde problem
         Args:
             -spot: spot at which to calculate the price
         Keyword Args:
             -get_price_on_whole_grid: (optional) If True return price for all spots
                                       on the calculation grid.
+            - dt: (optional) time grid spacing
+            - dx: (optional) x grid spacing
         """
-        expiry = self._option.get_expiry()
+        #expiry = self._option.get_expiry()
+        expiry = self._option.the_expiry
         diffusion_coeff = 0.5*self.volatility**2
         r = self.interest_rate
-        k = self._option._payoff.get_strike()
+        #k = self._option._payoff.get_strike()
+        k = self._option._payoff.the_strike
 
-        t_grid = FinDiffGrid1D(self._option.get_expiry(),0.0,int(800*self._option.get_expiry()))
+        t_grid = FinDiffGrid1D(expiry,0.0,int(expiry/dx))
         t_grid.make_linear_grid()
 
         spot_to_x = lambda s:np.log(s/k) #only defined at expiry
@@ -242,7 +246,7 @@ class BlackScholesSingleAssetPricer:
 
         x_max = max(2*np.amax(spot),10.0)
         x_min = min(-10.0,np.amin(spot))
-        x_grid = FinDiffGrid1D(x_min,x_max,int((x_max-x_min)/0.025))
+        x_grid = FinDiffGrid1D(x_min,x_max,int((x_max-x_min)/dt))
         x_grid.make_linear_grid()
 
         init_cond = self._option.get_option_payoff(k*np.exp(x_grid.grid))

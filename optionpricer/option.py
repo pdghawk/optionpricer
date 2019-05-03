@@ -44,6 +44,14 @@ class VanillaOption:
         """
         return self._expiry
 
+    @property
+    def the_expiry(self):
+        """ return the option's expiry time
+        Returns:
+            - expiry: the expiry of the option
+        """
+        return self._expiry
+
     def clone(self):
         """ get a clone (deep copy) of this object
         Returns:
