@@ -1,3 +1,6 @@
+""" Module for analytic expressions of option prices
+"""
+
 from scipy.stats import norm
 import numpy as np
 
@@ -13,7 +16,6 @@ def black_scholes_call_price(spot,strike,expiry,interest_rate,volatility):
 
       Returns:
         - price: the price of the European call
-
       """
       k = strike
       factor_plus  = (interest_rate+0.5*volatility**2)

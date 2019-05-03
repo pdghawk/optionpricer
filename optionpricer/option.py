@@ -1,4 +1,10 @@
-"""option classes
+""" Module for Option classes
+
+all option classes should have methods:
+
+- get_option_payoff()
+- clone()
+
 """
 
 from optionpricer import error

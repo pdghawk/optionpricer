@@ -1,4 +1,5 @@
-"""payoff Module
+""" Module for payoff classes
+
 series of classes for different payoff types
 
 in C++ would have an abstract base class, and inherited payoff classes
