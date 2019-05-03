@@ -235,8 +235,8 @@ class BlackScholesSingleAssetPricer:
         expiry = self._option.the_expiry
         diffusion_coeff = 0.5*self.volatility**2
         r = self.interest_rate
-        #k = self._option._payoff.get_strike()
-        k = self._option._payoff.the_strike
+        k = self._option._payoff.get_strike()
+        #k = self._option._payoff.the_strike
 
         t_grid = FinDiffGrid1D(expiry,0.0,int(expiry/dx))
         t_grid.make_linear_grid()

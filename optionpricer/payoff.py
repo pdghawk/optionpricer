@@ -47,13 +47,13 @@ class CallPayOff:
         """
         return self._strike
 
-    @property
-    def the_strike(self):
-        """ return the strike of this payoff object
-        Returns:
-            - strike: the strike of the payoff
-        """
-        return self._strike
+    # @property
+    # def the_strike(self):
+    #     """ return the strike of this payoff object
+    #     Returns:
+    #         - strike: the strike of the payoff
+    #     """
+    #     return self._strike
 
     def clone(self):
         """ get a clone (deep copy) of this object
