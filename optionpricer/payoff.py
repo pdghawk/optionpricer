@@ -9,13 +9,20 @@ get_payoff method could instead be __call__ method, but then any abject with __c
 would be able to be used like a payoff, which could cause unexpected errors.
 
 
-Payoffs need to have a clone method
+All Payoffs should have (at minimum) the following methods:
+
+get_payoff()
+get_strike()
+clone()
+__str__()
+
 """
 import copy
 import numpy as np
 #import error
 
 class CallPayOff:
+    """ Payoff for a call option """
     def __init__(self,strike):
         if not isinstance(strike,(float,int)):
             raise TypeError("CallPayOff object initialization: strike should be a float or an integer")
@@ -24,12 +31,26 @@ class CallPayOff:
         self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
+        """ returns the payoff for a given spot
+        Args:
+            - spot: the spot to get the payoff for
+        Returns:
+            - payoff: The payoff for the given spot
+        """
         return np.maximum((spot-self._strike), 0.0)
 
     def get_strike(self):
+        """ return the strike of this payoff object
+        Returns:
+            - strike: the strike of the payoff
+        """
         return self._strike
 
     def clone(self):
+        """ get a clone (deep copy) of this object
+        Returns:
+            - a deep copy of this object
+        """
         return copy.deepcopy(self)
 
     def __str__(self):
@@ -39,6 +60,7 @@ class CallPayOff:
 
 
 class PutPayOff:
+    """ Payoff for a put option """
     def __init__(self,strike):
         if not isinstance(strike,(float,int)):
             raise TypeError("PutPayOff object initialization: strike should be a float or an integer")
@@ -47,10 +69,27 @@ class PutPayOff:
         self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
+        """ returns the payoff for a given spot
+        Args:
+            - spot: the spot to get the payoff for
+        Returns:
+            - payoff: The payoff for the given spot
+        """
         return np.maximum((self._strike-spot), 0.0)
 
     def get_strike(self):
+        """ return the strike of this payoff object
+        Returns:
+            - strike: the strike of the payoff
+        """
         return self._strike
+
+    def clone(self):
+        """ get a clone (deep copy) of this object
+        Returns:
+            - a deep copy of this object
+        """
+        return copy.deepcopy(self)
 
     def __str__(self):
         return self._name
@@ -59,6 +98,7 @@ class PutPayOff:
 
 
 class DigitalPayOff:
+    """ Payoff for a digital option """
     def __init__(self,strike):
         if not isinstance(strike,(float,int)):
             raise TypeError("DisigitalPayOff object initialization: strike should be a float or an integer")
@@ -67,6 +107,12 @@ class DigitalPayOff:
         self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
+        """ returns the payoff for a given spot
+        Args:
+            - spot: the spot to get the payoff for
+        Returns:
+            - payoff: The payoff for the given spot
+        """
         if isinstance(spot, (float, int)):
             if spot>self._strike:
                 return 1.0
@@ -81,7 +127,18 @@ class DigitalPayOff:
 
 
     def get_strike(self):
+        """ return the strike of this payoff object
+        Returns:
+            - strike: the strike of the payoff
+        """
         return self._strike
+
+    def clone(self):
+        """ get a clone (deep copy) of this object
+        Returns:
+            - a deep copy of this object
+        """
+        return copy.deepcopy(self)
 
     def __str__(self):
         return self._name
@@ -90,6 +147,7 @@ class DigitalPayOff:
 
 
 class DoubleDigitalPayOff:
+    """ Payoff for a double digital option """
     def __init__(self,strike_lo,strike_hi):
         condition = isinstance(strike_lo,(float,int)) and \
                     isinstance(strike_hi,(float,int))
@@ -101,6 +159,12 @@ class DoubleDigitalPayOff:
         self._assets = 1 # number of assets this payoff relates to
 
     def get_payoff(self,spot):
+        """ returns the payoff for a given spot
+        Args:
+            - spot: the spot to get the payoff for
+        Returns:
+            - payoff: The payoff for the given spot
+        """
         if isinstance(spot, (float, int)):
             if spot>self._strike_lo and spot<self._strike_lo:
                 return 1.0
@@ -116,10 +180,25 @@ class DoubleDigitalPayOff:
 
 
     def get_strike(self,lo=True):
+        """ return the strike of this payoff object
+        Keyword Args:
+            - lo: if True, return the lower strike, else return the higher strike
+
+        Returns:
+            - strike: the strike of the payoff according to the selection of
+                      the lo keyword argument
+        """
         if lo:
             return self._strike_lo
         else:
             return self._strike_hi
+
+    def clone(self):
+        """ get a clone (deep copy) of this object
+        Returns:
+            - a deep copy of this object
+        """
+        return copy.deepcopy(self)
 
     def __str__(self):
         return self._name
