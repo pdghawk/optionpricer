@@ -60,7 +60,7 @@ def single_timed_path(spot,generator,times,r_param,vol_param):
     if isinstance(generator, Antithetic):
         print("Warning ( optionpricer.path.single_timed_path() ): generating a \
                timed sequence with antithetic generator")
-    for i range(1,len(times)):
+    for i in range(1,len(times)):
         r,var,mu,discount = get_path_constants(times[i-1], times[i],r_param, vol_param)
         rand_vals = generator.get_samples(1)
         future_spots[i] = future_spots[i-1]*np.exp(mu)
