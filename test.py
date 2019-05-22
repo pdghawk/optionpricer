@@ -192,83 +192,131 @@ print(type(call_option) is option.VanillaOption)
 # plt.show()
 
 # ------------------------------------------------------------------------------
-
-expiry    = 1.0/12.0
-
-strike = 50.0
-
-r0   = 0.094
-sig0 = 0.12
-r_param   = prmtr.SimpleParam(r0)
-vol_param = prmtr.SimpleParam(sig0)
-
-payoff_ = payoff.CallPayOff(strike)
-#payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
-option_ = option.VanillaOption(payoff_,expiry)
-
-gen_norm = generator.normal()
-gen_norm_antith = generator.antithetic(gen_norm)
-
-spots = np.linspace(40.0,70.0,30)
-
-mc_pricer = montecarlo.SAMonteCarlo(option_,gen_norm_antith)
-mc_prices = np.zeros_like(spots)
-for s_idx,s in enumerate(spots):
-    print('spot',s)
-    mc_prices[s_idx]  = mc_pricer.solve_price(s,r_param,vol_param)
-    print(mc_pricer.get_iteration_count())
-    mc_pricer.reset()
-    #print(mc_prices[s_idx])
-
-# print('monte carlo price = ', mc_price)
-# print(mc_pricer.get_iteration_count())
-
-bs_prices = analytics.black_scholes_call_price(spots,strike,expiry,r0,sig0)
-
-bcs = bspde.BoundaryConditions1D()
-bspricer = bspde.BlackScholesSingleAssetPricer(option_,r0,sig0,bcs)
-
-pde_prices   = bspricer.solve(spots)
-
-#plt.plot(spots,bs_prices,'k',label='Analytic')
-plt.fill_between(spots,bs_prices,facecolor='b',alpha=0.4,label='Analytic')
-plt.plot(spots,pde_prices,'k',label='PDE')
-plt.plot(spots,mc_prices,'r-.',label='Monte Carlo')
-plt.plot([strike, strike],[0,1.2*np.amax(bs_prices)],'b',label='strike')
-plt.legend(frameon=False)
-plt.xlabel('spot')
-plt.ylabel('option price')
-plt.title(str(option_))
-
-plt.xlim([spots[0], spots[-1]])
-plt.ylim([0,1.2*np.amax(bs_prices)])
-
-plt.show()
-
-pde_error = np.abs(pde_prices-bs_prices)/bs_prices
-mc_error  = np.abs(mc_prices-bs_prices)/bs_prices
-plt.semilogy(spots,pde_error,'k',label='PDE')
-plt.semilogy(spots,mc_error,'r-.',label='Monte')
-plt.plot([strike, strike],[1e-9,1],'b',label='strike')
-plt.legend(frameon=False)
-plt.xlabel('spot')
-plt.ylabel('|price - analytic|/analytic')
-plt.title(str(option_))
-
-plt.xlim([spots[0], spots[-1]])
-plt.ylim([1e-9, 1])
-
-plt.show()
-
 #
+# expiry    = 1.0/12.0
+#
+# strike = 50.0
+#
+# r0   = 0.094
+# sig0 = 0.12
+# r_param   = prmtr.SimpleParam(r0)
+# vol_param = prmtr.SimpleParam(sig0)
+#
+# payoff_ = payoff.CallPayOff(strike)
+# #payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
+# option_ = option.VanillaOption(payoff_,expiry)
+#
+# gen_norm = generator.Normal()
+# gen_norm_antith = generator.Antithetic(gen_norm)
+#
+# spots = np.linspace(40.0,70.0,30)
+#
+# mc_pricer = montecarlo.SAMonteCarlo(option_,gen_norm_antith)
+# mc_prices = np.zeros_like(spots)
+# for s_idx,s in enumerate(spots):
+#     print('spot',s)
+#     mc_prices[s_idx]  = mc_pricer.solve_price(s,r_param,vol_param)
+#     print(mc_pricer.get_iteration_count())
+#     mc_pricer.reset()
+#     #print(mc_prices[s_idx])
+#
+# # print('monte carlo price = ', mc_price)
+# # print(mc_pricer.get_iteration_count())
+#
+# bs_prices = analytics.black_scholes_call_price(spots,strike,expiry,r0,sig0)
+#
+# bcs = bspde.BoundaryConditions1D()
+# bspricer = bspde.BlackScholesSingleAssetPricer(option_,r0,sig0,bcs)
+#
+# pde_prices   = bspricer.solve(spots)
+#
+# #plt.plot(spots,bs_prices,'k',label='Analytic')
+# plt.fill_between(spots,bs_prices,facecolor='b',alpha=0.4,label='Analytic')
+# plt.plot(spots,pde_prices,'k',label='PDE')
+# plt.plot(spots,mc_prices,'r-.',label='Monte Carlo')
+# plt.plot([strike, strike],[0,1.2*np.amax(bs_prices)],'b',label='strike')
+# plt.legend(frameon=False)
+# plt.xlabel('spot')
+# plt.ylabel('option price')
+# plt.title(str(option_))
+#
+# plt.xlim([spots[0], spots[-1]])
+# plt.ylim([0,1.2*np.amax(bs_prices)])
+#
+# plt.show()
+#
+# pde_error = np.abs(pde_prices-bs_prices)/bs_prices
+# mc_error  = np.abs(mc_prices-bs_prices)/bs_prices
+# plt.semilogy(spots,pde_error,'k',label='PDE')
+# plt.semilogy(spots,mc_error,'r-.',label='Monte')
+# plt.plot([strike, strike],[1e-9,1],'b',label='strike')
+# plt.legend(frameon=False)
+# plt.xlabel('spot')
+# plt.ylabel('|price - analytic|/analytic')
+# plt.title(str(option_))
+#
+# plt.xlim([spots[0], spots[-1]])
+# plt.ylim([1e-9, 1])
+#
+# plt.show()
+#
+# #
+#
+# payoff_ = payoff.CallPayOff(strike)
+# #payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
+# option_ = option.VanillaOption(payoff_,expiry)
+#
+# print(option_.get_option_payoff(60.0))
+# payoff_._strike = 60.0
+# print(option_.get_option_payoff(60.0))
+# print(option_.get_expiry())
+# expiry = 1.23
+# print(option_.get_expiry())
 
-payoff_ = payoff.CallPayOff(strike)
-#payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
-option_ = option.VanillaOption(payoff_,expiry)
+################################################################################
+# rho=np.ones((3,3))*0.8
+sig = np.array([0.05,0.09,0.08])
+# covars = np.zeros((3,3))
+# covars = rho/
 
-print(option_.get_option_payoff(60.0))
-payoff_._strike = 60.0
-print(option_.get_option_payoff(60.0))
-print(option_.get_expiry())
-expiry = 1.23
-print(option_.get_expiry())
+
+
+covars = np.ones((3,3))*0.06**2
+# covars[0,0] = 0.02**2
+# covars[1,1] = 0.07**2
+# covars[2,2] = 0.09**2
+covars[1,2] = 0.08**2
+covars[2,1] = 0.08**2
+np.fill_diagonal(covars,sig**2)
+print(covars)
+
+print(covars[0,1]/np.sqrt(covars[0,0])/np.sqrt(covars[1,1]))
+print(covars[2,1]/np.sqrt(covars[2,2])/np.sqrt(covars[1,1]))
+print(covars[0,2]/np.sqrt(covars[0,0])/np.sqrt(covars[2,2]))
+
+from scipy import linalg
+
+L = linalg.cholesky(covars,lower=True)
+
+r0   = 0.024
+r_param   = prmtr.SimpleParam(r0)
+cholesky_param = prmtr.SimpleArrayParam(L)
+
+spots = [80,80,80]
+time0=0
+time1=10.0/252.0
+
+
+gen_norm = generator.Normal()
+gen_norm_antith = generator.Antithetic(gen_norm)
+
+Nt=100
+times=np.linspace(time0,time1,Nt)
+
+stock_paths = np.zeros((Nt,len(spots)))
+stock_paths[0,:] = spots
+for idx,t in enumerate(times[1:]):
+    stock_paths[idx+1,:] = path.single_multi_asset_path(stock_paths[idx,:],gen_norm_antith,time0,time1,r_param, cholesky_param)
+
+plt.plot(times,stock_paths)
+plt.show()

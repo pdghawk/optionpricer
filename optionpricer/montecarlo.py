@@ -22,7 +22,7 @@ def montecarlo_sa_vanilla_price(option_,n_paths,spot,generator,r_param,vol_param
     if type(option_) == option.VanillaOption:
         #expiry = option_.get_expiry()
         expiry = option_.the_expiry
-        future_spots = path.many_paths(n_paths,spot,generator,0.0,expiry,r_param,vol_param)
+        future_spots = path.many_single_asset_paths(n_paths,spot,generator,0.0,expiry,r_param,vol_param)
         _,_,_,discount = path.get_path_constants(0.0,expiry,r_param,vol_param)
         payoffs = option_.get_option_payoff(future_spots)
         payoffs *= discount
@@ -60,6 +60,7 @@ class SAMonteCarlo:
         Return:
             - price: price of the option
         """
+        self.reset()
         if type(self._option) == option.VanillaOption:
             while (self.eps>eps_tol and self._iter_count<max_paths):
                 new_price = montecarlo_sa_vanilla_price(self._option,

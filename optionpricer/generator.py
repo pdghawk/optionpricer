@@ -3,7 +3,7 @@
 import numpy as np
 import copy
 
-class normal:
+class Normal:
     """ object for generating random normally distributed numbers"""
     def __init__(self,mean=0.0,var=1.0):
         self.mean = mean
@@ -21,8 +21,10 @@ class normal:
     def clone(self):
         return copy.deepcopy(self)
 
+    simple_samples = get_samples
 
-class antithetic:
+
+class Antithetic:
     """ generate antithetic distributions
 
     Uses another generator class to get the statistical distribution type, but
@@ -68,6 +70,9 @@ class antithetic:
             self._negate = False
 
             return samples
+
+    def get_simple_samples(self,n_samples=1):
+        return self._generator.get_samples(n_samples)
 
     def clone(self):
         return copy.deepcopy(self)
