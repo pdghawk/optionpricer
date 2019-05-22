@@ -93,6 +93,9 @@ def many_single_asset_paths(n_paths, spot, generator, time0, time1, r_param, vol
     #future_spots *= discount
     return future_spots
 
+# ------------------------------------------------------------------------------
+# functions for multiple stocks at once
+# ------------------------------------------------------------------------------
 
 def get_multipath_constants(time0,time1,r_param,cholesky_param):
     """ get path constants within a time-window
@@ -124,4 +127,20 @@ def single_multi_asset_path(spots,generator,time0,time1,r_param, cholesky_param)
     rand_vals = np.dot(cholesky_param.mean(time0,time1),rand_vals_standard)
     future_spots = spots*np.exp(mu)
     future_spots *= np.exp(np.sqrt(vars)*rand_vals)
+    return future_spots
+
+def many_multi_asset_paths(n_paths,spots,generator,time0,time1,r_param, cholesky_param):
+    """
+
+    returns size (len(spots), n_paths)
+    """
+    assert(n_paths>0)
+    if n_paths==1:
+        return single_multi_asset_path(spots,generator,time0,time1,r_param, cholesky_param)
+    r,vars,mu,discount = get_multipath_constants(time0, time1,r_param, cholesky_param)
+    rand_vals0 = generator.get_samples(n_samples=n_paths,sample_dimension=len(spots))
+    rand_vals = np.dot(cholesky_param.mean(time0,time1),rand_vals0)
+    future_spots = spots*np.exp(mu)
+    future_spots = np.tile(future_spots[:,np.newaxis],(1,n_paths))
+    future_spots *= np.exp(np.tile(np.sqrt(vars[:,np.newaxis]),(1,n_paths))*rand_vals)
     return future_spots

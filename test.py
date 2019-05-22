@@ -302,7 +302,8 @@ r0   = 0.024
 r_param   = prmtr.SimpleParam(r0)
 cholesky_param = prmtr.SimpleArrayParam(L)
 
-spots = [80,80,80]
+spots = np.array([60,70,80])
+print("spots",np.shape(spots))
 time0=0
 time1=10.0/252.0
 
@@ -310,13 +311,16 @@ time1=10.0/252.0
 gen_norm = generator.Normal()
 gen_norm_antith = generator.Antithetic(gen_norm)
 
-Nt=100
-times=np.linspace(time0,time1,Nt)
+# Nt=100
+# times=np.linspace(time0,time1,Nt)
+#
+# stock_paths = np.zeros((Nt,len(spots)))
+# stock_paths[0,:] = spots
+# for idx,t in enumerate(times[1:]):
+#     stock_paths[idx+1,:] = path.single_multi_asset_path(stock_paths[idx,:],gen_norm_antith,time0,time1,r_param, cholesky_param)
+#
+# plt.plot(times,stock_paths)
+# plt.show()
 
-stock_paths = np.zeros((Nt,len(spots)))
-stock_paths[0,:] = spots
-for idx,t in enumerate(times[1:]):
-    stock_paths[idx+1,:] = path.single_multi_asset_path(stock_paths[idx,:],gen_norm_antith,time0,time1,r_param, cholesky_param)
-
-plt.plot(times,stock_paths)
-plt.show()
+many_multipath = path.many_multi_asset_paths(10,spots,gen_norm_antith,time0,time1,r_param,cholesky_param)
+print(many_multipath)
