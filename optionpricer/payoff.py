@@ -261,7 +261,7 @@ class ExchangePayOff:
         if isinstance(spot, np.ndarray):
             if (spot.ndim==2):
                 if(np.size(spot,1)==self._assets):
-                    payoff = spot[:,1] - spot[:,0]
+                    payoff = np.fmax(spot[:,0] - spot[:,1],np.zeros_like(spot[:,0]))
                     return payoff
                 else:
                     raise TypeError("spot supplied to ExchangePayOff is of wrong size")
@@ -277,6 +277,117 @@ class ExchangePayOff:
             - strike: None, as no strike for exchange object
         """
         return None
+
+    @property
+    def n_assets(self):
+        """ return the numnber of assets (underlyings) of this payoff object
+        Returns:
+            - number of underlyings
+        """
+        return self._assets
+
+    def clone(self):
+        """ get a clone (deep copy) of this object
+        Returns:
+            - a deep copy of this object
+        """
+        return copy.deepcopy(self)
+
+    def __str__(self):
+        return self._name
+
+    __repr__ = __str__
+
+
+class SpreadPayOff:
+    """ Payoff for a spread option """
+    def __init__(self,strike):
+        self._name   = "a spread option"
+        self._strike  = strike
+        self._assets = 2 # number of assets this payoff relates to
+
+    def get_payoff(self,spot):
+        """ returns the payoff for a given spot
+        Args:
+            - spot: the spot(s) to get the payoff for, of size [cases, 2]
+        Returns:
+            - payoff: The payoff for the given spot
+        """
+        if isinstance(spot, np.ndarray):
+            if (spot.ndim==2):
+                if(np.size(spot,1)==self._assets):
+                    payoff = np.fmax(spot[:,0] - spot[:,1] - self._strike,np.zeros_like(spot[:,0]))
+                    return payoff
+                else:
+                    raise TypeError("spot supplied to ExchangePayOff is of wrong size")
+            else:
+                raise TypeError("spot supplied to ExchangePayOff is of wrong size")
+        else:
+            raise TypeError("spot supplied to ExchangePayOff is of unsupported type")
+
+
+    def get_strike(self):
+        """ return the strike of this payoff object
+        Returns:
+            - strike: None, as no strike for exchange object
+        """
+        return self._strike
+
+    @property
+    def n_assets(self):
+        """ return the numnber of assets (underlyings) of this payoff object
+        Returns:
+            - number of underlyings
+        """
+        return self._assets
+
+    def clone(self):
+        """ get a clone (deep copy) of this object
+        Returns:
+            - a deep copy of this object
+        """
+        return copy.deepcopy(self)
+
+    def __str__(self):
+        return self._name
+
+    __repr__ = __str__
+
+
+class DoubleCallPayOff:
+    """ Payoff for an exchange option """
+    def __init__(self,strikes):
+        self._name   = "a double call option"
+        self.strikes = strikes
+        self._assets = 2 # number of assets this payoff relates to
+
+    def get_payoff(self,spot):
+        """ returns the payoff for a given spot
+        Args:
+            - spot: the spot(s) to get the payoff for, of size [cases, 2]
+        Returns:
+            - payoff: The payoff for the given spot
+        """
+        if isinstance(spot, np.ndarray):
+            if (spot.ndim==2):
+                if(np.size(spot,1)==self._assets):
+                    payoff = np.fmax(spot[:,0] - self.strikes[0],np.zeros_like(spot[:,0]))
+                    payoff += np.fmax(spot[:,1] - self.strikes[1],np.zeros_like(spot[:,0]))
+                    return payoff
+                else:
+                    raise TypeError("spot supplied to ExchangePayOff is of wrong size")
+            else:
+                raise TypeError("spot supplied to ExchangePayOff is of wrong size")
+        else:
+            raise TypeError("spot supplied to ExchangePayOff is of unsupported type")
+
+
+    def get_strike(self):
+        """ return the strike of this payoff object
+        Returns:
+            - strikes:
+        """
+        return self.strikes
 
     @property
     def n_assets(self):

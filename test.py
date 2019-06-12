@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
+from scipy import linalg
 
 call_payoff = payoff.CallPayOff(10.0)
 
@@ -197,7 +198,7 @@ print(type(call_option) is option.VanillaOption)
 #
 # strike = 50.0
 #
-# r0   = 0.094
+# r0   = 0.02
 # sig0 = 0.12
 # r_param   = prmtr.SimpleParam(r0)
 # vol_param = prmtr.SimpleParam(sig0)
@@ -215,7 +216,7 @@ print(type(call_option) is option.VanillaOption)
 # mc_prices = np.zeros_like(spots)
 # for s_idx,s in enumerate(spots):
 #     print('spot',s)
-#     mc_prices[s_idx]  = mc_pricer.solve_price(s,r_param,vol_param)
+#     mc_prices[s_idx]  = mc_pricer.solve_price(s,r_param,vol_param,eps_tol=0.0001)
 #     print(mc_pricer.get_iteration_count())
 #     mc_pricer.reset()
 #     #print(mc_prices[s_idx])
@@ -239,7 +240,7 @@ print(type(call_option) is option.VanillaOption)
 # plt.xlabel('spot')
 # plt.ylabel('option price')
 # plt.title(str(option_))
-#
+# #
 # plt.xlim([spots[0], spots[-1]])
 # plt.ylim([0,1.2*np.amax(bs_prices)])
 #
@@ -259,7 +260,7 @@ print(type(call_option) is option.VanillaOption)
 # plt.ylim([1e-9, 1])
 #
 # plt.show()
-#
+# #
 # #
 #
 # payoff_ = payoff.CallPayOff(strike)
@@ -275,52 +276,168 @@ print(type(call_option) is option.VanillaOption)
 
 ################################################################################
 # rho=np.ones((3,3))*0.8
-sig = np.array([0.05,0.09,0.08])
-# covars = np.zeros((3,3))
-# covars = rho/
+# sig = np.array([0.05,0.09,0.08])
+# # covars = np.zeros((3,3))
+# # covars = rho/
+#
+#
+#
+# covars = np.ones((3,3))*0.06**2
+# # covars[0,0] = 0.02**2
+# # covars[1,1] = 0.07**2
+# # covars[2,2] = 0.09**2
+# covars[1,2] = 0.08**2
+# covars[2,1] = 0.08**2
+# np.fill_diagonal(covars,sig**2)
+# print(covars)
+#
+# print(covars[0,1]/np.sqrt(covars[0,0])/np.sqrt(covars[1,1]))
+# print(covars[2,1]/np.sqrt(covars[2,2])/np.sqrt(covars[1,1]))
+# print(covars[0,2]/np.sqrt(covars[0,0])/np.sqrt(covars[2,2]))
+#
+# from scipy import linalg
+#
+# L = linalg.cholesky(covars,lower=True)
+#
+# r0   = 0.024
+# r_param   = prmtr.SimpleParam(r0)
+# cholesky_param = prmtr.SimpleArrayParam(L)
+#
+# spots = np.array([60,70,80])
+# print("spots",np.shape(spots))
+# time0=0
+# time1=10.0/252.0
+#
+#
+# gen_norm = generator.Normal()
+# gen_norm_antith = generator.Antithetic(gen_norm)
+#
+# # Nt=100
+# # times=np.linspace(time0,time1,Nt)
+# #
+# # stock_paths = np.zeros((Nt,len(spots)))
+# # stock_paths[0,:] = spots
+# # for idx,t in enumerate(times[1:]):
+# #     stock_paths[idx+1,:] = path.single_multi_asset_path(stock_paths[idx,:],gen_norm_antith,time0,time1,r_param, cholesky_param)
+# #
+# # plt.plot(times,stock_paths)
+# # plt.show()
+#
+# many_multipath = path.many_multi_asset_paths(10,spots,gen_norm_antith,time0,time1,r_param,cholesky_param)
+# print(many_multipath)
 
 
+# ------------------------------------------------------------------------------
+# expiry    = 1.0/12.0
+#
+# r0   = 0.094
+# r_param   = prmtr.SimpleParam(r0)
+#
+# sig=np.array([0.05,0.09])
+# rho = 0.8
+# correlation_matrix = np.array([[1,rho],[rho,1.0]])
+#
+# sig0_p = prmtr.SimpleParam(sig[0])
+# sig1_p = prmtr.SimpleParam(sig[1])
+#
+# # covars = np.ones((2,2))*0.06**2
+# # # covars[1,2] = 0.08**2
+# # # covars[2,1] = 0.08**2
+# # np.fill_diagonal(covars,sig**2)
+# covars = correlation_matrix*np.outer(sig,sig)
+# print(covars)
+#
+# L = linalg.cholesky(covars,lower=True)
+# print(L)
+# print(np.dot(L,L.T))
+# cholesky_param = prmtr.SimpleArrayParam(L)
+#
+# exchange_po     = payoff.SpreadPayOff(10.0)
+# exchange_option = option.VanillaOption(exchange_po,expiry)
+#
+# call0 = option.VanillaOption(payoff.CallPayOff(50.0),expiry)
+# call1 = option.VanillaOption(payoff.CallPayOff(55.0),expiry)
+#
+# gen_norm = generator.Normal()
+# gen_norm_antith = generator.Antithetic(gen_norm)
+#
+# spot0 = np.linspace(30.0,70.0,30)
+# spot1 = np.linspace(40.0,41.0,2)
+# SPOT0,SPOT1 = np.meshgrid(spot0,spot1)
+# #
+# mc_pricer = montecarlo.MAMonteCarlo(exchange_option,gen_norm_antith)
+# mc_prices = np.zeros_like(SPOT0)
+# magrabe_prices = np.zeros_like(SPOT0)
+#
+# # mc_pricer0 = montecarlo.SAMonteCarlo(call0,gen_norm_antith)
+# # mc_pricer1 = montecarlo.SAMonteCarlo(call1,gen_norm_antith)
+# # test_price = np.zeros_like(SPOT0)
+# for ind0 in range(SPOT0.shape[0]):
+#     for ind1 in range(SPOT0.shape[1]):
+#         s = np.array([SPOT0[ind0,ind1],SPOT1[ind0,ind1]])
+#         print('spot',s)
+#         mc_prices[ind0,ind1] = mc_pricer.solve_price(s,r_param,cholesky_param,eps_tol=0.0001)
+#         print(mc_pricer.get_iteration_count())
+#         mc_pricer.reset()
+#         magrabe_prices[ind0,ind1] =  analytics.margrabe_option_price(s,expiry,covars)
+#         # test_price[ind0,ind1] = mc_pricer0.solve_price(s[0],r_param,sig0_p)+mc_pricer1.solve_price(s[1],r_param,sig1_p)
+#
+#     #print(mc_prices[s_idx])
+#
+# #print('monte carlo (exchange) price = ', mc_price)
+#
+# plt.pcolormesh(spot0,spot1,mc_prices)
+# plt.colorbar()
+# plt.show()
+#
+# # plt.pcolormesh(spot0,spot1,test_price)
+# # plt.colorbar()
+# # plt.show()
+# #
+# # plt.pcolormesh(spot0,spot1,np.abs(test_price-mc_prices))
+# # plt.colorbar()
+# # plt.show()
+# #
+# plt.pcolormesh(spot0,spot1,magrabe_prices)
+# plt.colorbar()
+# plt.show()
+#
+# plt.pcolormesh(spot0,spot1,np.abs(magrabe_prices-mc_prices))
+# plt.colorbar()
+# plt.show()
 
-covars = np.ones((3,3))*0.06**2
-# covars[0,0] = 0.02**2
-# covars[1,1] = 0.07**2
-# covars[2,2] = 0.09**2
-covars[1,2] = 0.08**2
-covars[2,1] = 0.08**2
-np.fill_diagonal(covars,sig**2)
-print(covars)
+# ------------------------------------------------------------------------------
 
-print(covars[0,1]/np.sqrt(covars[0,0])/np.sqrt(covars[1,1]))
-print(covars[2,1]/np.sqrt(covars[2,2])/np.sqrt(covars[1,1]))
-print(covars[0,2]/np.sqrt(covars[0,0])/np.sqrt(covars[2,2]))
+expiry    = 1.0/12.0
 
-from scipy import linalg
+strike  = 50.0
+barrier = 60.0
 
-L = linalg.cholesky(covars,lower=True)
-
-r0   = 0.024
+r0   = 0.02
+sig0 = 0.12
 r_param   = prmtr.SimpleParam(r0)
-cholesky_param = prmtr.SimpleArrayParam(L)
+vol_param = prmtr.SimpleParam(sig0)
 
-spots = np.array([60,70,80])
-print("spots",np.shape(spots))
-time0=0
-time1=10.0/252.0
+payoff_ = payoff.CallPayOff(strike)
+#payoff = payoff.DoubleDigitalPayOff(strike-5.0,strike+5.0)
+barrier_call_upout = option.BarrierOption(payoff_,barrier,expiry,up=True,out=True)
+call_option = option.VanillaOption(payoff_,expiry)
 
+#print("valid = ",barrier_call_upout.validity)
 
 gen_norm = generator.Normal()
 gen_norm_antith = generator.Antithetic(gen_norm)
 
-# Nt=100
-# times=np.linspace(time0,time1,Nt)
-#
-# stock_paths = np.zeros((Nt,len(spots)))
-# stock_paths[0,:] = spots
-# for idx,t in enumerate(times[1:]):
-#     stock_paths[idx+1,:] = path.single_multi_asset_path(stock_paths[idx,:],gen_norm_antith,time0,time1,r_param, cholesky_param)
-#
-# plt.plot(times,stock_paths)
-# plt.show()
+spots = np.linspace(40.0,70.0,30)
 
-many_multipath = path.many_multi_asset_paths(10,spots,gen_norm_antith,time0,time1,r_param,cholesky_param)
-print(many_multipath)
+mc_pricer   = montecarlo.SAMonteCarlo(barrier_call_upout,gen_norm_antith)
+call_pricer = montecarlo.SAMonteCarlo(call_option,gen_norm_antith)
+prices=[]
+call_prices=[]
+for s in spots:
+    prices.append(mc_pricer.solve_price(s,r_param,vol_param))
+    call_prices.append(call_pricer.solve_price(s,r_param,vol_param))
+
+plt.plot(spots,prices,'k')
+plt.plot(spots,call_prices,'r')
+plt.show()

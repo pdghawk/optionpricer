@@ -93,6 +93,32 @@ def many_single_asset_paths(n_paths, spot, generator, time0, time1, r_param, vol
     #future_spots *= discount
     return future_spots
 
+def many_single_asset_timed_paths(n_paths, spot, generator,times, r_param, vol_param):
+    """ calculate many future spot value at a later time
+
+    Args:
+        - n_paths: number of paths to calculate
+        - spot: current spot
+        - generator: an optionpricer.generator object for generating statistical path
+        - times: 1d array of times
+        - r_param: (of optionpricer.parameter type) interest rate parameter
+        - vol_param: (of optionpricer.parameter type) volatility parameter
+    Returns:
+        - future_spots: values for spot at time1
+    """
+    assert(n_paths>0)
+    if n_paths==1:
+        return single_timed_path(spot, generator, time0, time1, r_param, vol_param)
+    rand_vals    = generator.get_samples(n_samples=n_paths, sample_dimension=len(times))
+    future_spots = np.zeros_like(rand_vals)
+    future_spots[0,:] = spot 
+    for i in range(1,len(times)):
+        r,var,mu,discount = get_path_constants(times[i-1], times[i],r_param, vol_param)
+        #rand_vals = generator.get_samples(1)
+        future_spots[i,:] = future_spots[i-1,:]*np.exp(mu)
+        future_spots[i,:] *= np.exp(np.sqrt(var)*rand_vals[i-1,:])
+    return future_spots
+
 # ------------------------------------------------------------------------------
 # functions for multiple stocks at once
 # ------------------------------------------------------------------------------
