@@ -11,7 +11,7 @@ The following books were used in the design of the package:
 
 Although, the ideas were translated into python. I have previously designed some
 larger C++ projects during my roles as a scientific researcher, with similar
-differential equation solving routines etc in C++, and so wanted to write this
-package in python for a change. I'm also anticipating the potential for leveraging
-Tensorflow's GPU libraries for both PDE and Monte Carlo pricing methods for
-high-dimensional multi-asset options where GPU's could be very useful.
+differential equation solving routines etc in C++ and Boost, and so wanted to
+write this package in python for a change. I'm also anticipating the potential
+for leveraging Tensorflow's GPU libraries for both PDE and Monte Carlo pricing 
+methods for high-dimensional multi-asset options where GPU's could be very useful.

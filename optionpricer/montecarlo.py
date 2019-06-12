@@ -2,9 +2,7 @@
 from optionpricer import path
 from optionpricer import option
 import numpy as np
-# monte carlo class perhaps
-# members: price, stats object, epsilon
-# so that as run, the stats object gets updated
+
 
 def montecarlo_sa_vanilla_price(option_,n_paths,spot,generator,r_param,vol_param,dt=0.0):
     """ get the price of a vanilla option based on n_paths
@@ -20,7 +18,6 @@ def montecarlo_sa_vanilla_price(option_,n_paths,spot,generator,r_param,vol_param
         - price: the statistically expected price
     """
     if type(option_) == option.VanillaOption:
-        #expiry = option_.get_expiry()
         expiry = option_.the_expiry
         future_spots = path.many_single_asset_paths(n_paths,spot,generator,0.0,expiry,r_param,vol_param)
         _,_,_,discount = path.get_path_constants(0.0,expiry,r_param,vol_param)
@@ -49,7 +46,6 @@ def montecarlo_sa_barrier_price(option_,n_paths,spot,generator,r_param,vol_param
     #TODO: Browninan bridge (prob of crossing a barrier between two points for
     # geometric brownian motion). would be more efficient
     if type(option_) == option.BarrierOption:
-        #expiry = option_.get_expiry()
         expiry = option_.the_expiry
         times  = np.linspace(0.0,expiry,int(expiry/dt))
         future_spots = path.many_single_asset_timed_paths(n_paths,spot,generator,times,r_param,vol_param)
@@ -67,8 +63,6 @@ def montecarlo_sa_barrier_price(option_,n_paths,spot,generator,r_param,vol_param
     else:
         raise NotImplementedError("only BarrierOption's can be  \
                                    priced by montecarlo_sa_barrier_price")
-    #print(np.cumsum(payoffs)/(1+np.arange(len(payoffs))))
-    #running_mean = np.cumsum(payoffs)/(1+np.arange(len(payoffs)))
     return np.mean(payoffs)
 
 class SAMonteCarlo:
@@ -79,7 +73,6 @@ class SAMonteCarlo:
     def __init__(self,option_,generator):
         self._option   = option_.clone()
         self._generator = generator.clone()
-        #self.options   = {'eps':0.1,'max_steps':1e6,'steps_per_iter':200}
         self.price = 0.0
         self.eps   = 1.0e20
         self._iter_count = 0
@@ -100,25 +93,6 @@ class SAMonteCarlo:
         """
         self.reset()
         if type(self._option) == option.VanillaOption:
-            # while (self.eps>eps_tol and self._iter_count<max_paths):
-            #     new_price = montecarlo_sa_vanilla_price(self._option,
-            #                                  paths_per_iter,
-            #                                  spot,
-            #                                  self._generator,
-            #                                  r_param,
-            #                                  vol_param,
-            #                                  dt=0.0)
-            #     old_price = self.price
-            #     if self._iter_count>0:
-            #         self.price = old_price + (new_price-old_price)/float(self._iter_count)
-            #     else:
-            #         self.price = new_price
-            #     self.eps = np.abs(old_price-new_price)
-            #     # print(self.eps)
-            #     # print(old_price,new_price,self.price)
-            #     self._iter_count +=paths_per_iter
-            # if(self._iter_count>=max_paths and self.eps>eps_tol):
-            #     print("\n\nWarning: SAMonteCarlo price stopped before convergence")
             self.iterate_price(montecarlo_sa_vanilla_price,
                                spot,
                                r_param,
@@ -171,8 +145,6 @@ class SAMonteCarlo:
             else:
                 self.price = new_price
             self.eps = np.abs(old_price-new_price)
-            # print(self.eps)
-            # print(old_price,new_price,self.price)
             self._iter_count +=paths_per_iter
         if(self._iter_count>=max_paths and self.eps>eps_tol):
             print("\n\nWarning: SAMonteCarlo price stopped before convergence")
@@ -223,8 +195,7 @@ def montecarlo_ma_vanilla_price(option_,n_paths,spots,generator,r_param,cholesky
     else:
         raise NotImplementedError("only VanillaOption's can be  \
                                    priced by montecarlo_sa_vanilla_price")
-    #print(np.cumsum(payoffs)/(1+np.arange(len(payoffs))))
-    #running_mean = np.cumsum(payoffs)/(1+np.arange(len(payoffs)))
+
     return np.mean(payoffs)
 
 class MAMonteCarlo:
@@ -238,7 +209,6 @@ class MAMonteCarlo:
             raise TypeError("option supplied to MAMonteCarlo has a payoff only \
                              on a single asset, should be a multi-asset payoff")
         self._generator = generator.clone()
-        #self.options   = {'eps':0.1,'max_steps':1e6,'steps_per_iter':200}
         self.prices = 0.0
         self.eps   = 1.0e20
         self._iter_count = 0
@@ -273,8 +243,6 @@ class MAMonteCarlo:
                 else:
                     self.prices = new_prices
                 self.eps = np.abs(old_prices-new_prices)
-                # print(self.eps)
-                # print(old_price,new_price,self.price)
                 self._iter_count +=paths_per_iter
             if(self._iter_count>=max_paths and self.eps>eps_tol):
                 print("\n\nWarning: SAMonteCarlo price stopped before convergence")
