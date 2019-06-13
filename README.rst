@@ -27,7 +27,7 @@ useful.
 See /notebooks for useful examples of usage.
 
 The directory structure is:
-
+::
 ├── LICENSE
 ├── README.rst
 ├── notebooks
