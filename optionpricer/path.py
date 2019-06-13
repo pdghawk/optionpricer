@@ -1,3 +1,5 @@
+""" Module for creating random pathways
+"""
 import numpy as np
 
 
@@ -111,7 +113,7 @@ def many_single_asset_timed_paths(n_paths, spot, generator,times, r_param, vol_p
         return single_timed_path(spot, generator, time0, time1, r_param, vol_param)
     rand_vals    = generator.get_samples(n_samples=n_paths, sample_dimension=len(times))
     future_spots = np.zeros_like(rand_vals)
-    future_spots[0,:] = spot 
+    future_spots[0,:] = spot
     for i in range(1,len(times)):
         r,var,mu,discount = get_path_constants(times[i-1], times[i],r_param, vol_param)
         #rand_vals = generator.get_samples(1)
