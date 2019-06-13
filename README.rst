@@ -30,21 +30,21 @@ The directory structure is:
 
 ::
 
-├── LICENSE
-├── README.rst
-├── notebooks
-│   ├── BlackScholesPdeExample.ipynb
-│   ├── MonteCarloVsPdeExample.ipynb
-│   └── MultiAssetExchangeOptions.ipynb
-├── optionpricer
-│   ├── __init__.py
-│   ├── analytics.py
-│   ├── bspde.py
-│   ├── error.py
-│   ├── generator.py
-│   ├── montecarlo.py
-│   ├── option.py
-│   ├── parameter.py
-│   ├── path.py
-│   └── payoff.py
-├── requirements.txt
+  ├── LICENSE
+  ├── README.rst
+  ├── notebooks
+  │   ├── BlackScholesPdeExample.ipynb
+  │   ├── MonteCarloVsPdeExample.ipynb
+  │   └── MultiAssetExchangeOptions.ipynb
+  ├── optionpricer
+  │   ├── __init__.py
+  │   ├── analytics.py
+  │   ├── bspde.py
+  │   ├── error.py
+  │   ├── generator.py
+  │   ├── montecarlo.py
+  │   ├── option.py
+  │   ├── parameter.py
+  │   ├── path.py
+  │   └── payoff.py
+  ├── requirements.txt
