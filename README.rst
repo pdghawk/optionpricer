@@ -1,3 +1,5 @@
+optionpricer - A Package for Pricing Financial Options and Derivatives
+------------------------------------------------------------------------
 
 This is a simple option pricing package, that is for pricing financial derivatives.
 
@@ -10,14 +12,15 @@ There are plans for extension of the package to exotic options, and the modular
 design of the package should aid this extension.
 
 The following books were used in the design of the package:
+
  - C++ Designs Patterns and Derivatives Pricing, M.S. Joshi (Cambridge University Press)
  - Guide to Scientific Computing in C++, Pitt-Francis and Whitely (Springer)
 
-Although, the ideas were translated into python. I have previously designed some
+The concepts were translated into python; since I have previously designed some
 larger C++ projects during my roles as a scientific researcher, with similar
 differential equation solving routines etc in C++ and Boost, and so wanted to
-write this package in python for a change. I'm also anticipating the potential
-for leveraging Tensorflow's GPU libraries, via python for both PDE and Monte Carlo
+write this package in python for a change. Further, I'm anticipating the potential
+for leveraging Tensorflow's GPU libraries, via python, for both PDE and Monte Carlo
 pricing methods for high-dimensional multi-asset options where GPU's could be very
 useful.
 
