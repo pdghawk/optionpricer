@@ -34,7 +34,6 @@ def margrabe_option_price(spots,expiry,covariance_matrix):
     """
     sigma = np.sqrt(np.trace(covariance_matrix) \
                     - np.trace(np.fliplr(covariance_matrix)))
-    print(sigma)
     if len(np.shape(spots))>1:
         s_plus  = spots[:,0]
         s_minus = spots[:,1]
@@ -47,7 +46,4 @@ def margrabe_option_price(spots,expiry,covariance_matrix):
         d1 = (np.log(s_plus/s_minus)+sigma**2*expiry)*0.5/sigma/np.sqrt(expiry)
         d2 = d1 - sigma*np.sqrt(expiry)
         price  = s_plus*norm.cdf(d1) - s_minus*norm.cdf(d2)
-        print(d1,d2)
-        print(norm.cdf(d1),norm.cdf(d2))
-        print(s_plus*norm.cdf(d1),s_minus*norm.cdf(d2))
     return price

@@ -26,7 +26,7 @@ class VanillaOption:
         self._expiry = expiry
         self._payoff = payoff.clone() # should be a clone
         self._name   = "a vanilla option with " + str(self._payoff) + ", and expiry: " + "{:.1f}".format(self._expiry*252.0) + "days"
-        print(self._name)
+        #print(self._name)
 
     def get_option_payoff(self,spot):
         """ returns the payoff of the option for a given spot
@@ -88,7 +88,7 @@ class BarrierOption:
         else:
             self._valid_payout = False
         self._name    = "a barrier option with " + str(self._payoff) + ", and expiry: " + "{:.1f}".format(self._expiry*252.0) + "days"
-        print(self._name)
+        #print(self._name)
 
     def get_option_payoff(self,spot):
         """ returns the payoff of the option for a given spot

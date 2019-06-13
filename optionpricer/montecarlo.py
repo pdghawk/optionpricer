@@ -237,7 +237,7 @@ class MAMonteCarlo:
                                                         r_param,
                                                         cholesky_param)
                 old_prices = self.prices
-                print(old_prices,new_prices)
+                #print(old_prices,new_prices)
                 if self._iter_count>0:
                     self.prices = old_prices + (new_prices-old_prices)/float(self._iter_count)
                 else:
