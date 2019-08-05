@@ -85,6 +85,9 @@ class SimpleArrayParam:
         return self.value
 
     def diag_square_integral(self,time0,time1):
+        return np.diag(self.value)**2*(time1-time0)
+
+    def diag_integral(self,time0,time1):
         return np.diag(self.value)*(time1-time0)
 
     def clone(self):

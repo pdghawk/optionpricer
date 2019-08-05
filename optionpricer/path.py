@@ -125,7 +125,7 @@ def many_single_asset_timed_paths(n_paths, spot, generator,times, r_param, vol_p
 # functions for multiple stocks at once
 # ------------------------------------------------------------------------------
 
-def get_multipath_constants(time0,time1,r_param,cholesky_param):
+def get_multipath_constants(time0,time1,r_param,covariance_param):
     """ get path constants within a time-window
     Args:
         - time0: beginning of time window
@@ -141,34 +141,42 @@ def get_multipath_constants(time0,time1,r_param,cholesky_param):
     """
     r = r_param.integral(time0,time1)
     # variance
-    vars = cholesky_param.diag_square_integral(time0,time1)
+    vars = covariance_param.diag_integral(time0,time1)
     # risk neutral movement position
     mu = r - 0.5*vars
     # discount to be applied due to time-value of money
     discount = np.exp(-r)
     return r,vars,mu,discount
 
-def single_multi_asset_path(spots,generator,time0,time1,r_param, cholesky_param):
-    r,vars,mu,discount = get_multipath_constants(time0, time1,r_param, cholesky_param)
+def single_multi_asset_path(spots,generator,time0,time1,r_param,covariance_param, cholesky_param=None):
+    r,vars,mu,discount = get_multipath_constants(time0, time1,r_param, covariance_param)
     # get samples that are not antithetic or decorated
     rand_vals_standard = generator.get_simple_samples(len(spots))
-    rand_vals = np.dot(cholesky_param.mean(time0,time1),rand_vals_standard)
+    if cholesky_param is None:
+        chol = linalg.cholesky(covariance_param.mean(time0,time1),lower=True)
+        cholesky_param = parameter.SimpleArrayParam(chol)
+    rand_vals = np.dot(np.sqrt(cholesky_param.square_integral(time0,time1)),rand_vals_standard)
     future_spots = spots*np.exp(mu)
-    future_spots *= np.exp(np.sqrt(vars)*rand_vals)
+    future_spots *= np.exp(rand_vals)
     return future_spots
 
-def many_multi_asset_paths(n_paths,spots,generator,time0,time1,r_param, cholesky_param):
+def many_multi_asset_paths(n_paths,spots,generator,time0,time1,r_param,covariance_param,cholesky_param=None):
     """
 
     returns size (len(spots), n_paths)
     """
     assert(n_paths>0)
+    if cholesky_param is None:
+        chol = linalg.cholesky(covariance_param.mean(time0,time1),lower=True)
+        cholesky_param = parameter.SimpleArrayParam(chol)
+
     if n_paths==1:
-        return single_multi_asset_path(spots,generator,time0,time1,r_param, cholesky_param)
+        return single_multi_asset_path(spots,generator,time0,time1,r_param, covariance_param,cholesky_param)
+
     r,vars,mu,discount = get_multipath_constants(time0, time1,r_param, cholesky_param)
     rand_vals0 = generator.get_samples(n_samples=n_paths,sample_dimension=len(spots))
-    rand_vals = np.dot(cholesky_param.mean(time0,time1),rand_vals0)
+    rand_vals = np.dot(np.sqrt(cholesky_param.square_integral(time0,time1)),rand_vals0)
     future_spots = spots*np.exp(mu)
     future_spots = np.tile(future_spots[:,np.newaxis],(1,n_paths))
-    future_spots *= np.exp(np.tile(np.sqrt(vars[:,np.newaxis]),(1,n_paths))*rand_vals)
+    future_spots *= np.exp(rand_vals)
     return future_spots
