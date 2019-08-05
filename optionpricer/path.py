@@ -1,7 +1,7 @@
 """ Module for creating random pathways
 """
 import numpy as np
-
+from scipy import linalg
 
 def get_path_constants(time0,time1,r_param, vol_param):
     """ get path constants within a time-window
@@ -173,7 +173,7 @@ def many_multi_asset_paths(n_paths,spots,generator,time0,time1,r_param,covarianc
     if n_paths==1:
         return single_multi_asset_path(spots,generator,time0,time1,r_param, covariance_param,cholesky_param)
 
-    r,vars,mu,discount = get_multipath_constants(time0, time1,r_param, cholesky_param)
+    r,vars,mu,discount = get_multipath_constants(time0, time1,r_param, covariance_param)
     rand_vals0 = generator.get_samples(n_samples=n_paths,sample_dimension=len(spots))
     rand_vals = np.dot(np.sqrt(cholesky_param.square_integral(time0,time1)),rand_vals0)
     future_spots = spots*np.exp(mu)

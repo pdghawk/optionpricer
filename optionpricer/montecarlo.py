@@ -172,7 +172,7 @@ class SAMonteCarlo:
 # multiasset functions and classes
 # ------------------------------------------------------------------------------
 
-def montecarlo_ma_vanilla_price(option_,n_paths,spots,generator,r_param,cholesky_param):
+def montecarlo_ma_vanilla_price(option_,n_paths,spots,generator,r_param,covariance_param,cholesky_param=None):
     """ get the price of a vanilla option based on n_paths
 
     Args:
@@ -188,8 +188,8 @@ def montecarlo_ma_vanilla_price(option_,n_paths,spots,generator,r_param,cholesky
     if type(option_) == option.VanillaOption:
         #expiry = option_.get_expiry()
         expiry = option_.the_expiry
-        future_spots = path.many_multi_asset_paths(n_paths,spots,generator,0.0,expiry,r_param,cholesky_param)
-        _,_,_,discount = path.get_multipath_constants(0.0,expiry,r_param,cholesky_param)
+        future_spots = path.many_multi_asset_paths(n_paths,spots,generator,0.0,expiry,r_param,covariance_param,cholesky_param)
+        _,_,_,discount = path.get_multipath_constants(0.0,expiry,r_param,covariance_param)
         payoffs = option_.get_option_payoff(future_spots.T)
         payoffs *= discount
     else:
@@ -213,7 +213,7 @@ class MAMonteCarlo:
         self.eps   = 1.0e20
         self._iter_count = 0
 
-    def solve_price(self,spots,r_param,cholesky_param,eps_tol=0.001,max_paths=1e6,paths_per_iter=200):
+    def solve_price(self,spots,r_param,covariance_param,cholesky_param=None,eps_tol=0.001,max_paths=1e6,paths_per_iter=200):
         """ get the price of the option
 
         Args:
@@ -235,6 +235,7 @@ class MAMonteCarlo:
                                                         spots,
                                                         self._generator,
                                                         r_param,
+                                                        covariance_param,
                                                         cholesky_param)
                 old_prices = self.prices
                 #print(old_prices,new_prices)
